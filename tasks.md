@@ -22,8 +22,8 @@ Last reviewed: 2026-11-26 (Approver)
 |---|---|---|---|---|
 | S1 | Leadership approval for the IT Teams Bot design | Share the private design page with Agilify leadership | Approver | Open |
 | S2 | Commit the starter files and protect `main` | n/a | Approver | **Done 2026-11-26**: commit 03f3c7c (24 files); `main` requires a PR, 0 approvals, no bypass for admins, no force push / delete |
-| S3 | Test the permission rules | Open Claude Code in this repo, run `/permissions`, check every rule is accepted | Approver | Open |
-| S4 | Test the copied read-only scripts once (Check-LostLaptop, Check-EnrollmentReadiness, Check-NewLaptops on a known laptop; Get-BitLockerKey in your own window) | Run each once; confirm logs.txt lands in this repo | Approver | Open (scripts copied 2026-11-26; syntax-checked only) |
+| S3 | Test the permission rules | n/a | Approver | **Done 2026-11-26**: `/permissions` shows all 18 allow and all 40 deny rules from shared project settings, incl. rules with `*` in the middle |
+| S4 | Test the read-only scripts | n/a | Approver | **Done 2026-11-26**: Get-WhoAmI (MODE=UNKNOWN until the groups exist), Check-LostLaptop, Check-NewLaptops, Check-EnrollmentReadiness on CQ38514; logs.txt lands in this repo. Get-BitLockerKey: shows the key only after the right name is typed, shows nothing for a wrong name, and the Agent refused to run it |
 | S5 | Create groups `sg-itdesk-support` (role-assignable) and `sg-itdesk-admins` | Terraform PR in m365-terraform | Approver | After S1 |
 | S6 | Move the inventory spreadsheet to the Agilify IT Team; convert main tabs to Excel Tables; IT Support Tech read-only | Upload the latest version; retire the local copy | Approver | After S1 |
 | S7 | Build the Teams bot, Release 1 | See design page, section 13 | Approver | After S1 |
@@ -32,7 +32,7 @@ Last reviewed: 2026-11-26 (Approver)
 
 | # | Laptop | User | Next step | Owner | Status |
 |---|---|---|---|---|---|
-| P1 | AGY-U-CQ38514 (Inspiron 15 3530) | Jennifer Irons | Shipped after pre-provisioning (green, resealed 2026-11-25). After she signs in: check primary user, compliant, encrypted, **new** BitLocker key, Windows activated (Inspiron key risk). Inv #19 | User, then Approver | Waiting for first sign-in |
+| P1 | AGY-U-CQ38514 (Inspiron 15 3530) | Jennifer Irons | Shipped after pre-provisioning (green, resealed 2026-11-25). After she signs in: check primary user, compliant, encrypted, **new** BitLocker key, Windows activated (Inspiron key risk), and that **Defender real-time protection is on** (before sign-in, compliance showed RtpEnabled + SignatureOutOfDate nonCompliant on 2026-11-26). Inv #19 | User, then Approver | Waiting for first sign-in |
 | P2 | AGY-U-5FHB9G4 (Dell Pro 16, 16 GB) | Megan Spencer | Handover in the office, week of 30 Nov. Stale since 2026-03-06, not encrypted, old Windows build: reset (or sync + Windows Update) at handover, then check compliant + encrypted + primary user. Inv #18 | Approver | Planned |
 | P3 | AGY-U-1JB9514 (Inspiron 15 3530) | none (stock) | Reset using the forced-recovery reset runbook (Shift+Restart and SupportAssist don't work on it). Entra still lists the previous user (left): move labels after setup. Inv #20 | Approver | Open |
 | P4 | 8K1K5H4 (Dell Pro 16) | Felix (assigned) | Currently enrolled in another tenant; re-enroll in Agilify Intune later. Inv #17 | Approver | Later |

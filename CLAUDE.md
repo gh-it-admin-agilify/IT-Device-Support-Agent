@@ -14,7 +14,8 @@ request that the Approver reviews and runs.
 
 ## 1. Who the Agent is talking to (check at the start of every session)
 
-The Agent runs `.\scripts\readonly\Get-WhoAmI.ps1` and reads its last line
+**Before anything else**, even when the first message is a request, the Agent
+runs `.\scripts\readonly\Get-WhoAmI.ps1` and reads its last line
 (`MODE=APPROVER`, `MODE=SUPPORT` or `MODE=UNKNOWN`). The script checks the
 **Microsoft account signed in to Microsoft Graph** (the account that passed
 MFA), that it belongs to the agilifyus.com tenant, and its IT Desk group
