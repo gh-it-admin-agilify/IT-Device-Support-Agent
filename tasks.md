@@ -21,7 +21,7 @@ Last reviewed: 2026-11-26 (Approver)
 | # | Task | Next step | Owner | Status |
 |---|---|---|---|---|
 | S1 | Leadership approval for the IT Teams Bot design | Share the private design page with Agilify leadership | Approver | Open |
-| S2 | Commit the starter files (README, CLAUDE.md, .gitignore, settings, Get-WhoAmI, request template, this file) | Commit in GitHub Desktop; then protect `main` (PR required) | Approver | Open |
+| S2 | Commit the starter files and protect `main` | n/a | Approver | **Done 2026-11-26**: commit 03f3c7c (24 files); `main` requires a PR, 0 approvals, no bypass for admins, no force push / delete |
 | S3 | Test the permission rules | Open Claude Code in this repo, run `/permissions`, check every rule is accepted | Approver | Open |
 | S4 | Test the copied read-only scripts once (Check-LostLaptop, Check-EnrollmentReadiness, Check-NewLaptops on a known laptop; Get-BitLockerKey in your own window) | Run each once; confirm logs.txt lands in this repo | Approver | Open (scripts copied 2026-11-26; syntax-checked only) |
 | S5 | Create groups `sg-itdesk-support` (role-assignable) and `sg-itdesk-admins` | Terraform PR in m365-terraform | Approver | After S1 |
