@@ -1,7 +1,7 @@
 # How the tenant is set up for laptops
 
 Last updated: 2026-11-26 (Agent, from the Approver's read-only checks of
-2026-11-08 to 2026-11-25). The Agent can read these settings but never
+2026-11-08 to 2026-11-25, and the IT Desk group / role apply of 2026-11-26). The Agent can read these settings but never
 changes them; changes go through a change request.
 
 ## Autopilot
@@ -49,11 +49,16 @@ changes them; changes go through a change request.
 | **Quick Assist** (Ctrl + Windows + Q) | **Yes**: free, works even on laptops not in Intune. A UAC admin prompt shows only on the user's screen and pauses the session |
 | Intune Remote Help, Remediations, Defender Live Response | **No** (not licensed / not set up) |
 
-## Groups for this project (planned)
+## Groups and role for this project (created 2026-11-26)
 
-| Group | Members | Purpose |
-|---|---|---|
-| `sg-itdesk-support` (role-assignable) | IT Support Tech | Bot access (support mode), BitLocker key read, inventory read |
-| `sg-itdesk-admins` | Approver | Bot access (approver mode), receives change requests |
+| Object | Members / scope | Purpose | Managed in (m365-terraform) |
+|---|---|---|---|
+| `sg-itdesk-admins` (group `fe4e4496-59c8-400f-8220-f6d5dcce16fb`) | Approver | Bot access (approver mode), receives change requests | `environments/prod/entra-groups.tf` (pipeline) |
+| `sg-itdesk-support` (group `41825516-a26b-4d3b-af0b-bee626d9a5db`, role-assignable) | IT Support Tech (**empty** until their account exists) | Bot access (support mode), BitLocker key read, inventory read | `privileged/itdesk-support.tf` (applied locally by a Global Admin) |
+| Custom Entra role **“BitLocker Key Reader”** (`0907e661-26c2-4d82-89f9-31e997130158`) | Assigned tenant-wide to `sg-itdesk-support` | One permission only: `microsoft.directory/bitlockerKeys/key/read` | `privileged/itdesk-support.tf` |
 
-Both to be created through the Approver's Terraform repo (tasks.md S5).
+Why two places: changing a role-assignable group or a role assignment needs
+RoleManagement.ReadWrite.Directory, which no pipeline identity has on purpose
+(it could grant any admin role). Those changes are applied by a Global Admin
+from the admin laptop. Swapping the IT Support Tech = edit `members` in
+`privileged/itdesk-support.tf` → pull request → local apply.
