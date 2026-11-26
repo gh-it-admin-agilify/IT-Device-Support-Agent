@@ -25,7 +25,8 @@ Last reviewed: 2026-11-26 (Approver)
 | S2 | Commit the starter files and protect `main` | n/a | Approver | **Done 2026-11-26**: commit 03f3c7c (24 files); `main` requires a PR, 0 approvals, no bypass for admins, no force push / delete |
 | S3 | Test the permission rules | n/a | Approver | **Done 2026-11-26**: `/permissions` shows all 18 allow and all 40 deny rules from shared project settings, incl. rules with `*` in the middle |
 | S4 | Test the read-only scripts | n/a | Approver | **Done 2026-11-26**: Get-WhoAmI (MODE=UNKNOWN until the groups exist), Check-LostLaptop, Check-NewLaptops, Check-EnrollmentReadiness on CQ38514; logs.txt lands in this repo. Get-BitLockerKey: shows the key only after the right name is typed, shows nothing for a wrong name, and the Agent refused to run it |
-| S5 | Create groups `sg-itdesk-support` (role-assignable) and `sg-itdesk-admins` | Terraform PR in m365-terraform | Approver | **Next** |
+| S5 | Create groups `sg-itdesk-support` (role-assignable) and `sg-itdesk-admins` | n/a | Approver | **Done 2026-11-26**: `sg-itdesk-admins` via the m365-terraform pipeline (PR #26); `sg-itdesk-support` + custom role "BitLocker Key Reader" + assignment via m365-terraform `privileged/` (applied locally by the Approver). Support group is **empty** |
+| S9 | Add the IT Support Tech to `sg-itdesk-support` | When their Agilify account exists: add the object ID to `members` in m365-terraform `privileged/itdesk-support.tf` → PR → local apply | Approver | Waiting for the account |
 | S6 | Move the inventory spreadsheet to the Agilify IT Team; convert main tabs to Excel Tables; IT Support Tech read-only | Upload the latest version; retire the local copy | Approver | Open |
 | S7 | Build the Teams bot, Release 1 | See design page, section 13 | Approver | After S5 + S6 |
 
