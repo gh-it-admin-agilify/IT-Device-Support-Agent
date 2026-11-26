@@ -1,0 +1,33 @@
+# IT-Device-Support-Agent: keep local output, spreadsheets and secrets out of git
+
+# Script output and screenshots handed to the Agent
+logs.txt
+*.log
+screenshot*.png
+screenshots/
+
+# Device and inventory data (the spreadsheet lives in the Agilify IT Team, not here)
+*.xlsx
+*.xls
+*.csv
+exports/
+
+# Secrets and credentials: never commit
+.env
+.env.*
+*.pfx
+*.pem
+*.key
+*secret*
+*credential*
+
+# Claude Code personal settings (shared settings in .claude/settings.json ARE committed)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Editor / OS clutter
+.vscode/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store
