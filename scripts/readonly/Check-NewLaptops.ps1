@@ -95,9 +95,12 @@ foreach ($name in $DeviceName) {
     Out-Line "BitLocker keys in Entra: $(@($keys).Count)"
     foreach ($k in $keys) { Out-Line "  $($k.volumeType) key, created $($k.createdDateTime)" }
 
-    # Office detection.
+    # Office detection. "Microsoft.MicrosoftOfficeHub" is the small Microsoft 365
+    # hub app that ships with Windows, not the Office apps: ignore it.
     $apps = Get-All "$dev/detectedApps"
-    $office = $apps | Where-Object { $_.displayName -match 'Microsoft 365|Office' }
+    $office = $apps | Where-Object {
+        $_.displayName -match 'Microsoft 365|Office' -and $_.displayName -notmatch 'OfficeHub'
+    }
     if ($office) {
         foreach ($a in $office) { Out-Line "Office       : $($a.displayName) $($a.version)" }
     } else {

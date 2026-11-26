@@ -21,6 +21,8 @@ user has left, or their OneDrive is synced) before starting.
   - **Teams bot:** ask for the key link → open it → sign in + MFA → *Show recovery key*.
   - **Script:** in **your own** PowerShell window (never through the Agent):
     `.\scripts\readonly\Get-BitLockerKey.ps1 -DeviceName AGY-U-<serial>`. Screen only.
+    **Not** inside Claude Code with a `!` prefix either: that also puts the
+    output, and so the key, into the chat transcript.
   - **Portal:** Entra admin center → Devices → All devices → AGY-U-<serial> → BitLocker keys.
 
 ## Steps
