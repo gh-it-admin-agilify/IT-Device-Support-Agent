@@ -5,6 +5,13 @@ Only decisions about laptops, inventory and how this project works.
 
 | Date | Who | Decision |
 |---|---|---|
+| 2026-11-26 | Agilify leadership (reported by Felix) | **IT Teams Bot design approved**: an automated read-only reader of user and device data, a bot that edits the inventory spreadsheet, and an IT Support Tech with BitLocker key read access |
+| 2026-11-26 | Agilify leadership | AI model for the bot: **Claude through Microsoft Foundry** in Agilify's Azure subscription (managed identity, no API key, billed on the Azure invoice). Fallback only if unavailable: Anthropic API key in Key Vault |
+| 2026-11-26 | Agilify leadership | IT Support Tech's key access: **custom Entra role "BitLocker Key Reader"** (read keys only) on `sg-itdesk-support`; fallback Security Reader if the custom role can't hold that permission |
+| 2026-11-26 | Agilify leadership | Inventory **stays in Excel** (main tabs converted to Excel Tables) for now; a SharePoint list only if Excel stops working well |
+| 2026-11-26 | Agilify leadership | IT Support Tech sign-in: **MFA now**; add an Agilify-managed-device rule once the tech has an Agilify laptop |
+| 2026-11-26 | Agilify leadership | The bot's updates to this repo go through **pull requests** that the Approver merges |
+| 2026-11-26 | Felix | The Approver's own Claude Code work on Agilify moves to an **Agilify Claude licence** (not a personal / other-company plan) |
 | 2026-11-26 | Felix | The IT Support Tech works **only in Teams**, through the Agilify IT Bot. The virtual desktop (IT Desk) is optional / later |
 | 2026-11-26 | Felix | **The bot updates the inventory spreadsheet**, from its first release. The IT Support Tech does not edit it by hand; the Approver does not apply edits for the bot |
 | 2026-11-26 | Felix | The IT Support Tech **may read BitLocker keys** (Entra portal, via the bot's link; never in chat) |

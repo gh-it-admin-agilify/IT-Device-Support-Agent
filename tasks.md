@@ -20,13 +20,14 @@ Last reviewed: 2026-11-26 (Approver)
 
 | # | Task | Next step | Owner | Status |
 |---|---|---|---|---|
-| S1 | Leadership approval for the IT Teams Bot design | Share the private design page with Agilify leadership | Approver | Open |
+| S1 | Leadership approval for the IT Teams Bot design | n/a | Approver | **Done 2026-11-26**: approved, all decisions as recommended (see knowledge/decisions.md) |
+| S8 | Move the Approver's Claude Code work on Agilify to an Agilify Claude licence | Get the Agilify seat; sign Claude Code in with it (`/login`); then use only that account for Agilify repos | Approver | Open |
 | S2 | Commit the starter files and protect `main` | n/a | Approver | **Done 2026-11-26**: commit 03f3c7c (24 files); `main` requires a PR, 0 approvals, no bypass for admins, no force push / delete |
 | S3 | Test the permission rules | n/a | Approver | **Done 2026-11-26**: `/permissions` shows all 18 allow and all 40 deny rules from shared project settings, incl. rules with `*` in the middle |
 | S4 | Test the read-only scripts | n/a | Approver | **Done 2026-11-26**: Get-WhoAmI (MODE=UNKNOWN until the groups exist), Check-LostLaptop, Check-NewLaptops, Check-EnrollmentReadiness on CQ38514; logs.txt lands in this repo. Get-BitLockerKey: shows the key only after the right name is typed, shows nothing for a wrong name, and the Agent refused to run it |
-| S5 | Create groups `sg-itdesk-support` (role-assignable) and `sg-itdesk-admins` | Terraform PR in m365-terraform | Approver | After S1 |
-| S6 | Move the inventory spreadsheet to the Agilify IT Team; convert main tabs to Excel Tables; IT Support Tech read-only | Upload the latest version; retire the local copy | Approver | After S1 |
-| S7 | Build the Teams bot, Release 1 | See design page, section 13 | Approver | After S1 |
+| S5 | Create groups `sg-itdesk-support` (role-assignable) and `sg-itdesk-admins` | Terraform PR in m365-terraform | Approver | **Next** |
+| S6 | Move the inventory spreadsheet to the Agilify IT Team; convert main tabs to Excel Tables; IT Support Tech read-only | Upload the latest version; retire the local copy | Approver | Open |
+| S7 | Build the Teams bot, Release 1 | See design page, section 13 | Approver | After S5 + S6 |
 
 ## 2. Laptops being provisioned
 
