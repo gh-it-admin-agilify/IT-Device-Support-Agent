@@ -55,8 +55,12 @@ The full rules for the Agent are in [`CLAUDE.md`](CLAUDE.md).
 | `reports/` | Daily read-only findings (when automated) |
 | `tasks.md` | Shared open-task list |
 
-The inventory spreadsheet is **not** in this repo: it lives in the Agilify IT
-Team in Teams. Spreadsheets, CSV exports, logs and screenshots are kept out of
+The inventory spreadsheet is **not** in this repo. The one live copy is
+`Agilify_Asset_Inventory.xlsx` in Teams: **Agilify IT** (private Team) →
+**Device Support** (private channel) → Files → `Device Inventory`
+(SharePoint site `AgilifyIT-DeviceSupport`). Its data tabs are Excel Tables
+(`tblStock`, `tblDecommissioning`, `tblIntuneDevices`, `tblUnaccounted`,
+`tblAutopilotNotInIntune`, `tblHardwareSpecs`, `tblIssues`). Spreadsheets, CSV exports, logs and screenshots are kept out of
 git by [`.gitignore`](.gitignore).
 
 ---

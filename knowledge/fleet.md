@@ -45,6 +45,15 @@ Per-laptop status lives in the inventory spreadsheet, not here.
 
 ## Where things are
 
+- **Inventory spreadsheet (the only live copy, since 2026-11-26):** Teams →
+  **Agilify IT** → **Device Support** (private channel) → Files →
+  `Device Inventory/Agilify_Asset_Inventory.xlsx`. SharePoint site:
+  `https://agilifyus.sharepoint.com/sites/AgilifyIT-DeviceSupport`.
+  Tabs used as Excel Tables: `tblStock`, `tblDecommissioning`,
+  `tblIntuneDevices`, `tblUnaccounted`, `tblAutopilotNotInIntune`,
+  `tblHardwareSpecs`, `tblIssues` (Summary is not a table).
+- If Excel desktop shows "REFRESH RECOMMENDED – a newer version is on the
+  server", click **Discard Changes** (it had opened a cached older copy).
 - Stock is kept at the Approver's house until assigned (see the Stock tab).
 - Dell component lists (specs) are kept by the Approver; the Agent asks when
   a model's specs aren't listed here.
