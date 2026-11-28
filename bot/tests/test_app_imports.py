@@ -33,6 +33,18 @@ def test_attachment_downloader_api_used_by_app():
     assert "content_type" in Attachment.model_fields
 
 
+def test_background_turn_and_typing_api_used_by_app():
+    from microsoft_agents.activity import Activity, ActivityTypes
+    from microsoft_agents.hosting.aiohttp import CloudAdapter
+    from microsoft_agents.hosting.core.app.app_options import ApplicationOptions
+
+    params = inspect.signature(CloudAdapter.continue_conversation_with_claims).parameters
+    assert {"claims_identity", "continuation_activity", "callback"} <= set(params)
+    assert inspect.iscoroutinefunction(CloudAdapter.continue_conversation_with_claims)
+    assert Activity(type=ActivityTypes.typing).type == "typing"
+    assert "start_typing_timer" in ApplicationOptions.__dataclass_fields__
+
+
 def test_sender_id_field_names():
     from microsoft_agents.activity import Activity, ChannelAccount
 
