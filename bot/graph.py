@@ -45,12 +45,18 @@ _READ_ALLOW = [
     # Inventory workbook on the Device Support site only
     rf"^v1\.0/sites/{_S}/drive/root/(children|search\(q='[^']*'\))$",
     rf"^v1\.0/sites/{_S}/drive/items/[^/:]+(/content|/versions|/children)?$",
+    # SharePoint lists on the same site (L0 test; lists.py adds its own name rules)
+    rf"^v1\.0/sites/{_S}/lists(/[^/]+(/columns|/items(/[^/]+(/versions)?)?)?)?$",
 ]
 _WRITE_ALLOW = {
     "PUT": [
         rf"^v1\.0/sites/{_S}/drive/items/[^/:]+/content$",                 # replace an existing file
         rf"^v1\.0/sites/{_S}/drive/items/[^/:]+:/[^/:]+\.xlsx:/content$",  # new .xlsx in a folder
     ],
+    # List ITEMS only (rows): never lists, columns, permissions or other sites.
+    "POST": [rf"^v1\.0/sites/{_S}/lists/[^/]+/items$"],
+    "PATCH": [rf"^v1\.0/sites/{_S}/lists/[^/]+/items/[^/]+/fields$"],
+    "DELETE": [rf"^v1\.0/sites/{_S}/lists/[^/]+/items/[^/]+$"],
 }
 _BLOCK = [
     r"recoveryKeys/[^/]+",          # a single key object could expose the value via $select=key
@@ -127,6 +133,22 @@ class GraphClient:
         except ValueError:
             body = {}
         return resp.status_code, body
+
+    async def send_json(self, method: str, path: str, body: dict | None = None,
+                        if_match: str | None = None) -> tuple[int, dict]:
+        """POST/PATCH/DELETE with a JSON body (list items). Returns (status, body) without raising,
+        so callers can handle 412 (row changed meanwhile) themselves."""
+        check_allowed(method, path)
+        extra = {"Content-Type": "application/json"}
+        if if_match:
+            extra["If-Match"] = if_match
+        resp = await self._http.request(method.upper(), f"{GRAPH}/{path.lstrip('/')}",
+                                        headers=self._headers(**extra), json=body, timeout=60)
+        try:
+            data = resp.json()
+        except ValueError:
+            data = {}
+        return resp.status_code, data
 
     async def get_all(self, path: str, limit: int = 500) -> list[dict]:
         items: list[dict] = []
