@@ -35,6 +35,7 @@ async def create_app() -> Application:
     from .config import Settings
     from .graph import GraphClient
     from .identity import IdentityResolver
+    from .inventory import InventoryStore
     from .memory import ConversationStore
 
     logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
@@ -57,6 +58,7 @@ async def create_app() -> Application:
         max_steps=settings.max_tool_steps,
         max_tokens=settings.max_output_tokens,
         memory=ConversationStore(settings.memory_max_messages, settings.memory_ttl_hours),
+        inventory=InventoryStore(graph),
     )
 
     @agent_app.activity("message")

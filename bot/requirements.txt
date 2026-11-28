@@ -11,3 +11,5 @@ azure-identity>=1.17,<2.0
 aiohttp>=3.9,<4.0
 httpx>=0.27,<1.0
 gunicorn>=22,<24
+# Inventory workbook: open/edit/save .xlsx in memory (option A: download -> edit -> upload)
+openpyxl>=3.1,<4.0
