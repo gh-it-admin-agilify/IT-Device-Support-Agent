@@ -45,5 +45,9 @@ def test_sdk_reads_managed_identity_settings_from_env():
     }
     manager = MsalConnectionManager(**load_configuration_from_env(env))
     cfg = manager.get_default_connection_configuration()
-    assert str(getattr(cfg, "auth_type", "")).endswith(("UserManagedIdentity", "user_managed_identity"))
-    assert getattr(cfg, "client_id", None) == "11111111-2222-3333-4444-555555555555"
+    # Attribute names differ between SDK versions (e.g. AUTH_TYPE vs auth_type), so check the values.
+    values = {k: str(v) for k, v in vars(cfg).items()}
+    seen = " ".join(values.values())
+    assert "UserManagedIdentity" in seen or "user_managed_identity" in seen, values
+    assert "11111111-2222-3333-4444-555555555555" in values.values(), values
+    assert "66666666-7777-8888-9999-000000000000" in values.values(), values
