@@ -22,6 +22,7 @@ the m365-terraform repo (`environments/prod/itdesk-bot.tf`).
 | `identity.py` | Group-based mode |
 | `memory.py` | Conversation memory in RAM: last 60 messages per chat, forgotten after 4 h idle (app settings `MEMORY_MAX_MESSAGES`, `MEMORY_TTL_HOURS`); text only, no tool data or images |
 | `inventory.py` | Inventory workbook on the Device Support site: find, download, round-trip, upload with version check (eTag). Uploads only into `Device Inventory`, `.xlsx` only; during 5e-0 only `TEST - *` files. Approver command `selftest inventory` proves it on the TEST copy. `autosize_columns(wb)` is the **last step before every save**: column width = max(header + 4, longest value + 2), min 8; text longer than 50 → width 50 + **Wrap Text**; counted inside tables only. Rows emptied by a removal lose their formatting too (`clear_cell`) |
+| `lists.py` | SharePoint list **rows** (migration step L0): create / update / delete with the row's version tag (If-Match → 412). Graph allow-list permits list **items** only (never lists, columns or permissions); during L0 only lists named `TEST - *`. Approver command `selftest lists` proves it on the list `TEST - Lists` |
 | `claude.py` | Foundry client + bounded tool loop |
 | `graph.py` | Graph client with allow-list |
 | `tools/` | One file per tool: `laptop_status`, `person_devices`, `enrollment_readiness`, `not_enrolled`, `runbook` (shared helpers in `_common.py`) |

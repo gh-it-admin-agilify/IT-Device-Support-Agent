@@ -41,9 +41,10 @@ async def _no_notify(_: str) -> None:
 class ItBot:
     def __init__(self, graph: GraphClient, identity: IdentityResolver, claude_client: Any, deployment: str,
                  max_steps: int = 8, max_tokens: int = 1500, memory: ConversationStore | None = None,
-                 inventory: Any = None):
+                 inventory: Any = None, lists: Any = None):
         self.graph = graph
         self.inventory = inventory
+        self.lists = lists
         self.identity = identity
         self.claude = claude_client
         self.deployment = deployment
@@ -143,6 +144,10 @@ class ItBot:
             except Exception as exc:
                 log.exception("applying %s failed", pend["kind"])
                 return f"❌ Saving stopped: {type(exc).__name__}: {str(exc)[:300]}. Nothing was changed."
+        if not pend and text.lower() in YES_WORDS and not has_attachments:
+            return ("There's nothing waiting for a **yes** right now. The preview may have expired (15 minutes) or "
+                    "the bot restarted (for example after an update). Please run the command again, e.g. "
+                    "**Inventory Refresh**.")
         cancelled = "_(The pending change was cancelled.)_\n\n" if pend else ""
 
         if text.lower() in RESET_WORDS and not has_attachments:
@@ -156,6 +161,15 @@ class ItBot:
             except Exception as exc:
                 log.exception("inventory refresh preview failed")
                 return f"❌ Inventory Refresh stopped: {type(exc).__name__}: {str(exc)[:300]}. Nothing was changed."
+        if text.lower() == "selftest lists":
+            if mode is not Mode.APPROVER or self.lists is None:
+                return "The list self-test is for approvers only."
+            from .lists import selftest as list_selftest
+            try:
+                return cancelled + await list_selftest(self.lists)
+            except Exception as exc:
+                log.exception("list selftest failed")
+                return f"❌ List self-test stopped: {type(exc).__name__}: {str(exc)[:300]}"
         if text.lower() == "selftest inventory":
             if mode is not Mode.APPROVER or self.inventory is None:
                 return "The inventory self-test is for approvers only."

@@ -66,6 +66,7 @@ async def create_app() -> Application:
     from .graph import GraphClient
     from .identity import IdentityResolver
     from .inventory import InventoryStore
+    from .lists import ListStore
     from .memory import ConversationStore
 
     logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
@@ -91,6 +92,7 @@ async def create_app() -> Application:
         max_tokens=settings.max_output_tokens,
         memory=ConversationStore(settings.memory_max_messages, settings.memory_ttl_hours),
         inventory=InventoryStore(graph),
+        lists=ListStore(graph),
     )
 
     recent_ids: deque = deque(maxlen=500)   # ignore a message Teams delivers twice
