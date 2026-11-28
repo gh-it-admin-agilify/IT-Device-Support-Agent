@@ -22,6 +22,9 @@ FOLDER = "Device Inventory"
 TEST_FILE = "TEST - Agilify_Asset_Inventory.xlsx"
 ROUNDTRIP_FILE = "TEST - roundtrip.xlsx"
 TEST_PREFIX = "TEST - "
+# The workbook the bot edits. Until step 5f this is the TEST copy (replace() also refuses
+# any file not starting with "TEST - "), then it switches to the real one.
+TARGET_FILE = TEST_FILE
 
 
 class InventoryRefused(Exception):
