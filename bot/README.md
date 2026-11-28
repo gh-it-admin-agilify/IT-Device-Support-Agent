@@ -21,7 +21,7 @@ the m365-terraform repo (`environments/prod/itdesk-bot.tf`).
 | `refresh.py` | `Inventory Refresh`: rebuilds tblIntuneDevices and tblAutopilotNotInIntune from Graph (hand-written columns kept by serial, formula columns keep formulas), removes **in-use** laptops (Intune + primary user + check-in ≤ 30 days) from tblStock, and from tblDecommissioning only when used by **someone other than** the row's "Last user" (re-deployed; still with the last user = kept and shown in the preview), logs to tblChangeLog. Preview first; saved with the version check |
 | `identity.py` | Group-based mode |
 | `memory.py` | Conversation memory in RAM: last 60 messages per chat, forgotten after 4 h idle (app settings `MEMORY_MAX_MESSAGES`, `MEMORY_TTL_HOURS`); text only, no tool data or images |
-| `inventory.py` | Inventory workbook on the Device Support site: find, download, round-trip, upload with version check (eTag). Uploads only into `Device Inventory`, `.xlsx` only; during 5e-0 only `TEST - *` files. Approver command `selftest inventory` proves it on the TEST copy |
+| `inventory.py` | Inventory workbook on the Device Support site: find, download, round-trip, upload with version check (eTag). Uploads only into `Device Inventory`, `.xlsx` only; during 5e-0 only `TEST - *` files. Approver command `selftest inventory` proves it on the TEST copy. `autosize_columns(wb)` is the **last step before every save**: column width = longest header/value + 2 (min 8, max 60), counted inside tables only |
 | `claude.py` | Foundry client + bounded tool loop |
 | `graph.py` | Graph client with allow-list |
 | `tools/` | One file per tool: `laptop_status`, `person_devices`, `enrollment_readiness`, `not_enrolled`, `runbook` (shared helpers in `_common.py`) |

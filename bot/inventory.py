@@ -94,6 +94,44 @@ class InventoryStore:
         return await self.graph.put_bytes(_p(f"items/{item_id}/content"), data, if_match=etag)
 
 
+# ---------- column widths: call autosize_columns(wb) as the LAST step before EVERY save
+
+MIN_WIDTH, MAX_WIDTH = 8, 60
+
+
+def _text_len(value) -> int:
+    from datetime import date, datetime
+
+    if value is None:
+        return 0
+    if isinstance(value, datetime):
+        return 16  # shown as e.g. 2026-11-28 13:25
+    if isinstance(value, date):
+        return 10
+    text = str(value)
+    if text.startswith("="):  # a formula: its result is usually short; don't size by the formula text
+        return 10
+    return max((len(line) for line in text.splitlines()), default=0)
+
+
+def autosize_columns(wb) -> None:
+    """Approximate Excel's AutoFit (openpyxl can't measure fonts): for every column of every
+    table, width = longest header/value + 2, between MIN_WIDTH and MAX_WIDTH characters.
+    Only cells inside tables count, so a long title above a table doesn't widen column A."""
+    from openpyxl.utils import get_column_letter
+    from openpyxl.utils.cell import range_boundaries
+
+    for ws in wb.worksheets:
+        widths: dict[int, int] = {}
+        for t in ws.tables.values():
+            c1, r1, c2, r2 = range_boundaries(t.ref)
+            for c in range(c1, c2 + 1):
+                longest = max((_text_len(ws.cell(r, c).value) for r in range(r1, r2 + 1)), default=0)
+                widths[c] = max(widths.get(c, 0), longest)
+        for c, n in widths.items():
+            ws.column_dimensions[get_column_letter(c)].width = min(max(n + 2, MIN_WIDTH), MAX_WIDTH)
+
+
 # ---------- workbook inspection (runs in a worker thread: openpyxl is CPU work)
 
 _PART_KINDS = ("media", "drawings", "charts", "pivotTables", "pivotCache", "comments",

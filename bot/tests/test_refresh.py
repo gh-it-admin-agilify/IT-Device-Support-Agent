@@ -209,7 +209,8 @@ async def test_refresh_needs_yes_and_saves_once():
         notes.append(t)
 
     preview = await bot.handle("u", "Inventory Refresh", "c", who="Tech", notify=notify)
-    assert "preview" in preview and "Type **yes**" in preview and store.saved == []
+    assert "preview" in preview and "type **yes**" in preview and store.saved == []
+    assert "Close the workbook in Excel first" in preview
     assert any("step 1 of 3" in n for n in notes)
     assert (await bot.handle("u", "yes", "c", who="Tech", notify=notify)).startswith("✅ Inventory refreshed")
     assert len(store.saved) == 1
@@ -221,7 +222,48 @@ async def test_anything_but_yes_cancels():
     bot.claude = None
     reply = await bot.handle("u", "reset", "c")
     assert "cancelled" in reply and store.saved == []
-    assert "Type **yes**" not in await bot.handle("u", "reset", "c")
+    assert "type **yes**" not in await bot.handle("u", "reset", "c")
+
+
+class LockedStore(FakeStore):
+    async def replace(self, _, data, etag):
+        return 423, {"error": {"code": "resourceLocked"}}
+
+
+async def test_locked_workbook_says_close_excel(monkeypatch):
+    import bot.agent as agent_mod
+
+    async def no_sleep(_):
+        return None
+
+    monkeypatch.setattr(agent_mod.asyncio, "sleep", no_sleep)
+    g = SrcGraph({})
+    store = LockedStore(make_workbook())
+    b = ItBot(g, IdentityResolver(g, "a", "s"), None, "dep", inventory=store)
+    await b.handle("u", "Inventory Refresh", "c")
+    reply = await b.handle("u", "yes", "c")
+    assert "Close it in Excel" in reply and store.saved == []
+
+
+def test_columns_autosized_after_save():
+    from bot.inventory import MAX_WIDTH, MIN_WIDTH
+
+    wb = load_workbook(io.BytesIO(make_workbook()))
+    ws = wb["Stock"]
+    ws["O3"] = "a long original note that needs a wide column"
+    ws["A1"].value = "Serial"
+    out = io.BytesIO()
+    wb.save(out)
+    data = out.getvalue()
+    new, _ = refresh.apply_plan(data, refresh.plan_refresh(data, SRC, NOW), "Felix", NOW)
+    wb2 = load_workbook(io.BytesIO(new))
+    st = wb2["Stock"]
+    assert st.column_dimensions["O"].width == len("a long original note that needs a wide column") + 2
+    assert st.column_dimensions["B"].width == MIN_WIDTH                       # short header "Type"
+    intune = wb2["Intune Devices"]
+    assert intune.column_dimensions["N"].width == 18                          # dates: 16 + 2
+    log = wb2["Change Log"]
+    assert all(MIN_WIDTH <= log.column_dimensions[c].width <= MAX_WIDTH for c in "ABCDEFG")
 
 
 async def test_keep_typing_sends_indicator_and_one_still_working():
