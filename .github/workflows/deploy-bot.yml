@@ -45,7 +45,7 @@ jobs:
       - name: Package (bot code + requirements, no tests)
         run: |
           mkdir -p dist
-          rsync -a --exclude tests --exclude '__pycache__' bot/ dist/bot/
+          rsync -a --exclude tests --exclude teams-app --exclude '__pycache__' bot/ dist/bot/
           cp bot/requirements.txt dist/requirements.txt
           cd dist && zip -qr ../bot.zip . && cd ..
           unzip -l bot.zip
