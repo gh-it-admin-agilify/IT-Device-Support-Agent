@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.30/MicrosoftTeams.schema.json",
   "manifestVersion": "1.30",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "id": "5d7e2b1c-8a43-4f6e-9c21-3b8e7a90d4f6",
   "developer": {
     "name": "Agilify IT",
@@ -26,14 +26,17 @@
     {
       "botId": "c36dcf57-8f8a-4093-9301-169303f8ec1b",
       "scopes": ["personal"],
-      "supportsFiles": false,
+      "supportsFiles": true,
       "isNotificationOnly": false,
       "commandLists": [
         {
           "scopes": ["personal"],
           "commands": [
             { "title": "Laptop status", "description": "e.g. What's the status of SERIAL-1?" },
-            { "title": "Help", "description": "What can the bot do?" }
+            { "title": "Whose laptop", "description": "e.g. What laptops does User A have?" },
+            { "title": "Not enrolled", "description": "Which laptops are in Autopilot but not in Intune?" },
+            { "title": "Runbook", "description": "e.g. How do I reset an Inspiron? (one step at a time)" },
+            { "title": "Help", "description": "What can the bot do? You can also paste a photo of a screen." }
           ]
         }
       ]

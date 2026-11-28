@@ -21,6 +21,18 @@ def test_sdk_names_used_by_app_exist():
     assert "connection_manager" in inspect.signature(AgentApplication.__init__).parameters
 
 
+def test_attachment_downloader_api_used_by_app():
+    from microsoft_agents.activity import Activity, Attachment
+    from microsoft_agents.hosting.core.app.input_file import InputFile
+    from microsoft_agents.hosting.core.app.m365_attachment_downloader import M365AttachmentDownloader
+
+    assert "connections" in inspect.signature(M365AttachmentDownloader.__init__).parameters
+    assert inspect.iscoroutinefunction(M365AttachmentDownloader.download_files)
+    assert "content" in InputFile.__dataclass_fields__
+    assert "attachments" in Activity.model_fields
+    assert "content_type" in Attachment.model_fields
+
+
 def test_sender_id_field_names():
     from microsoft_agents.activity import Activity, ChannelAccount
 
