@@ -33,10 +33,16 @@ async def ask(
     run_tool: ToolRunner,
     max_steps: int = 6,
     max_tokens: int = 1500,
+    history: list[dict] | None = None,
 ) -> str:
-    """One user message -> answer, letting Claude call the fixed tools (bounded)."""
+    """One user message -> answer, letting Claude call the fixed tools (bounded).
+
+    `history` is earlier conversation TEXT only (alternating user/assistant).
+    This turn's tool calls and results are used here and then dropped.
+    """
     system = f"{PROMPT}\n\n## Current mode\n{mode}"
-    messages: list[dict] = [{"role": "user", "content": user_text}]
+    messages: list[dict] = [dict(m) for m in (history or [])]
+    messages.append({"role": "user", "content": user_text})
 
     for _ in range(max_steps):
         resp = await asyncio.to_thread(
@@ -60,7 +66,7 @@ async def ask(
             except Exception as exc:  # report, don't crash the conversation
                 result = {"error": f"{type(exc).__name__}: {exc}"}
             results.append(
-                {"type": "tool_result", "tool_use_id": block.id, "content": json.dumps(result, default=str)[:20000]}
+                {"type": "tool_result", "tool_use_id": block.id, "content": json.dumps(result, default=str)[:30000]}
             )
         messages.append({"role": "user", "content": results})
 

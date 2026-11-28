@@ -25,11 +25,15 @@ _READ_ALLOW = [
     r"^(v1\.0|beta)/deviceManagement/managedDevices/[^/]+/deviceCompliancePolicyStates(/[^/]+/settingStates)?$",
     r"^(v1\.0|beta)/deviceManagement/windowsAutopilotDeviceIdentities(/[^/]+)?$",
     r"^v1\.0/devices(/[^/]+)?$",
-    r"^v1\.0/devices/[^/]+/registeredUsers$",
+    r"^v1\.0/devices/[^/]+/(registeredUsers|memberOf)$",
+    r"^v1\.0/users$",
     r"^v1\.0/users/[^/]+$",
     r"^v1\.0/users/[^/]+/(licenseDetails|managedDevices)$",
     r"^v1\.0/users/[^/]+/transitiveMemberOf(/microsoft\.graph\.group)?$",
     r"^v1\.0/informationProtection/bitlocker/recoveryKeys$",
+    # Enrollment readiness (same reads as scripts/readonly/Check-EnrollmentReadiness.ps1)
+    r"^beta/policies/mobileDeviceManagementPolicies(/[^/]+/includedGroups)?$",
+    r"^beta/deviceManagement/deviceEnrollmentConfigurations$",
 ]
 _BLOCK = [
     r"recoveryKeys/[^/]+",          # a single key object could expose the value via $select=key

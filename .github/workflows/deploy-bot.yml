@@ -5,10 +5,10 @@ name: bot
 
 on:
   pull_request:
-    paths: ["bot/**", "pytest.ini", ".github/workflows/deploy-bot.yml"]
+    paths: ["bot/**", "runbooks/**", "knowledge/**", "pytest.ini", ".github/workflows/deploy-bot.yml"]
   push:
     branches: [main]
-    paths: ["bot/**", "pytest.ini", ".github/workflows/deploy-bot.yml"]
+    paths: ["bot/**", "runbooks/**", "knowledge/**", "pytest.ini", ".github/workflows/deploy-bot.yml"]
   workflow_dispatch:
 
 permissions:
@@ -42,10 +42,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Package (bot code + requirements, no tests)
+      - name: Package (bot code + runbooks/knowledge + requirements, no tests)
         run: |
           mkdir -p dist
           rsync -a --exclude tests --exclude teams-app --exclude '__pycache__' bot/ dist/bot/
+          mkdir -p dist/bot/knowledge
+          cp -r runbooks knowledge dist/bot/knowledge/
           cp bot/requirements.txt dist/requirements.txt
           cd dist && zip -qr ../bot.zip . && cd ..
           unzip -l bot.zip
