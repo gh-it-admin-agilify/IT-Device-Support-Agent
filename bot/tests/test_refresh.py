@@ -126,6 +126,40 @@ def test_growing_into_used_cells_is_blocked():
         assert "A5" in str(exc)
 
 
+def test_same_person_matching():
+    sp = refresh.same_person
+    assert sp("Adrienne Streater", "adrienne.streater@x.com", "Adrienne Streater")
+    assert sp("adrienne.streater@x.com", "adrienne.streater@x.com", "Adrienne Streater")
+    assert sp("adrienne.streater", "adrienne.streater@x.com", "Adrienne Streater")
+    assert sp("Adrienne", "adrienne.streater@x.com", "Adrienne Streater")
+    assert not sp("Sara Yates", "adrienne.streater@x.com", "Adrienne Streater")
+    assert not sp("", "adrienne.streater@x.com", "Adrienne Streater")
+
+
+def test_decommissioning_keeps_laptops_still_with_their_last_user():
+    wb = load_workbook(io.BytesIO(make_workbook()))
+    ws = wb["Decommissioning"]
+    rows = [["OLD1", "Dell", "Vostro", "replaced", "Adrienne Streater"],   # still with Adrienne -> keep
+            ["OLD2", "Dell", "Vostro", "replaced", "Sara Yates"],          # now used by Adrienne -> remove
+            ["OLD3", "Dell", "Vostro", "replaced", ""]]                    # last user unknown -> keep, flag
+    for i, r in enumerate(rows, start=3):
+        for j, v in enumerate(r, start=1):
+            ws.cell(i, j).value = v
+    ws.tables["tblDecommissioning"].ref = "A1:J5"
+    out = io.BytesIO()
+    wb.save(out)
+    adrienne = {"userPrincipalName": "adrienne.streater@x.com", "userDisplayName": "Adrienne Streater",
+                "lastSyncDateTime": "2026-11-28T08:00:00Z", "deviceName": "x"}
+    src = dict(SRC, intune=SRC["intune"] + [dict(adrienne, serialNumber=s) for s in ("OLD1", "OLD2", "OLD3")])
+    plan = refresh.plan_refresh(out.getvalue(), src, NOW)
+    assert [r["serial"] for r in plan.remove["tblDecommissioning"]] == ["OLD2"]
+    assert "re-deployed" in plan.remove["tblDecommissioning"][0]["why"]
+    kept = {r["serial"]: r["why"] for r in plan.kept["tblDecommissioning"]}
+    assert "still with Adrienne Streater" in kept["OLD1"] and "please check" in kept["OLD3"]
+    text = refresh.preview(plan)
+    assert "Kept in Decommissioning" in text and "OLD2 (re-deployed" in text
+
+
 # ---- the agent flow: preview -> "yes" -> save with eTag
 
 
