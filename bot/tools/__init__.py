@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from types import ModuleType
 
-from . import laptop_status
+from . import enrollment_readiness, laptop_status, not_enrolled, person_devices, runbook
 
 TOOLS: dict[str, ModuleType] = {
-    laptop_status.SPEC["name"]: laptop_status,
+    m.SPEC["name"]: m
+    for m in (laptop_status, person_devices, enrollment_readiness, not_enrolled, runbook)
 }
 
 

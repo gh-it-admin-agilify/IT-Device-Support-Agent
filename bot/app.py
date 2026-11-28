@@ -34,6 +34,7 @@ async def create_app() -> Application:
     from .config import Settings
     from .graph import GraphClient
     from .identity import IdentityResolver
+    from .memory import ConversationStore
 
     logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
     settings = Settings.from_env()
@@ -53,6 +54,7 @@ async def create_app() -> Application:
         deployment=settings.claude_deployment,
         max_steps=settings.max_tool_steps,
         max_tokens=settings.max_output_tokens,
+        memory=ConversationStore(settings.memory_max_messages, settings.memory_ttl_hours),
     )
 
     @agent_app.activity("message")
@@ -60,8 +62,10 @@ async def create_app() -> Application:
         # Sender identity verified by Teams / Bot Service: activity.from_property.aad_object_id
         sender = getattr(context.activity, "from_property", None)
         aad_id = getattr(sender, "aad_object_id", None)
+        conversation = getattr(context.activity, "conversation", None)
+        conv_id = getattr(conversation, "id", None)
         try:
-            reply = await bot.handle(aad_id, context.activity.text or "")
+            reply = await bot.handle(aad_id, context.activity.text or "", conv_id)
         except Exception:
             log.exception("message handling failed")
             reply = "Sorry, something went wrong on my side. Please try again in a minute."

@@ -17,11 +17,13 @@ the m365-terraform repo (`environments/prod/itdesk-bot.tf`).
 | File | Purpose |
 |---|---|
 | `app.py` | Web server (aiohttp + Microsoft 365 Agents SDK 1.9) |
-| `agent.py` | Identity check → Claude → reply |
+| `agent.py` | Identity check → Claude → reply; `reset` command |
 | `identity.py` | Group-based mode |
+| `memory.py` | Conversation memory in RAM: last 60 messages per chat, forgotten after 4 h idle (app settings `MEMORY_MAX_MESSAGES`, `MEMORY_TTL_HOURS`); text only, no tool data or images |
 | `claude.py` | Foundry client + bounded tool loop |
 | `graph.py` | Graph client with allow-list |
-| `tools/` | One file per tool (Release 1 so far: `laptop_status`) |
+| `tools/` | One file per tool: `laptop_status`, `person_devices`, `enrollment_readiness`, `not_enrolled`, `runbook` (shared helpers in `_common.py`) |
+| `knowledge/` | Not in git: the repo's `runbooks/` and `knowledge/` are copied here at deploy, so editing a runbook updates the bot on the next deploy |
 | `prompt.md` | The bot's instructions |
 | `tests/` | Automated tests with fake Graph and Claude (no tenant access) |
 
