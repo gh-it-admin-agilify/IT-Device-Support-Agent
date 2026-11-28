@@ -1,0 +1,13 @@
+# Agilify IT Bot (IT Teams Bot, Release 1). Python 3.12 on Azure App Service (Linux).
+# Microsoft 365 Agents SDK for Python (Teams bot hosting + managed identity sign-in)
+microsoft-agents-activity==1.9.0
+microsoft-agents-hosting-core==1.9.0
+microsoft-agents-hosting-aiohttp==1.9.0
+microsoft-agents-authentication-msal==1.9.0
+# Claude in Microsoft Foundry (AnthropicFoundry) + Entra sign-in with the managed identity
+anthropic>=0.70,<1.0
+azure-identity>=1.17,<2.0
+# HTTP + server
+aiohttp>=3.9,<4.0
+httpx>=0.27,<1.0
+gunicorn>=22,<24
