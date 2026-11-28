@@ -390,8 +390,6 @@ def append_log(wb, entries: list[list]) -> None:
         ws = wb[CHANGELOG_SHEET] if CHANGELOG_SHEET in wb.sheetnames else wb.create_sheet(CHANGELOG_SHEET)
         for i, h in enumerate(LOG_HEADERS, start=1):
             ws.cell(1, i).value = h
-        for i, w in enumerate([18, 22, 24, 12, 22, 40, 40], start=1):
-            ws.column_dimensions[get_column_letter(i)].width = w
         t = Table(displayName=T_LOG, ref=f"A1:{get_column_letter(len(LOG_HEADERS))}2",
                   tableStyleInfo=TableStyleInfo(name="TableStyleMedium2", showRowStripes=True))
         ws.add_table(t)
@@ -431,6 +429,8 @@ def apply_plan(data: bytes, plan: Plan, who: str, now: datetime | None = None) -
             log.append([when, who, t, s, "(row removed)", gone[s], ""])
             removed += 1
     append_log(wb, log)
+    from .inventory import autosize_columns
+    autosize_columns(wb)  # last step before every save: columns wide enough for their text
     out = io.BytesIO()
     wb.save(out)
     summary = (f"✅ Inventory refreshed: Intune Devices {len(plan.intune_rows)} rows, "

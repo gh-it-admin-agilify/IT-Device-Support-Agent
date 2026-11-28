@@ -71,13 +71,15 @@ class ItBot:
         except refresh.RefreshBlocked as exc:
             return f"❌ Inventory Refresh can't run safely: {exc}. Nothing was changed."
         self.pending[conv] = {"kind": "refresh", "item_id": item["id"], "plan": plan, "at": time.monotonic()}
-        return (refresh.preview(plan) + f"\n\nFile: **{TARGET_FILE}**. Type **yes** to save these changes "
-                "(within 15 minutes). Anything else cancels.")
+        return (refresh.preview(plan) + f"\n\nFile: **{TARGET_FILE}**. ⚠️ **Close the workbook in Excel first** "
+                "(on every PC): Excel's AutoSave can save its own copy over mine. Then type **yes** to save these "
+                "changes (within 15 minutes). Anything else cancels.")
 
     async def _refresh_apply(self, pend: dict, who: str, notify: Notify) -> str:
         from . import refresh
 
         await notify("⏳ Saving: downloading the latest copy, applying the changes, uploading with the version check…")
+        status = 0
         for attempt in range(1, 5):
             meta = await self.inventory.item(pend["item_id"])
             data = await self.inventory.download(pend["item_id"])
@@ -92,11 +94,15 @@ class ItBot:
                 await notify("⏳ Someone changed the file while I was working; re-reading their version…")
                 continue
             if status == 423:  # open/locked
-                await notify(f"⏳ The file is locked (probably open in Excel). Retrying in 15 seconds ({attempt}/4)…")
+                await notify(f"⏳ The workbook is locked, probably open in Excel. Please close it; "
+                             f"retrying in 15 seconds ({attempt}/4)…")
                 await asyncio.sleep(15)
                 continue
             return f"❌ Save failed: HTTP {status} {body.get('error', {}).get('code', '')}. Nothing was changed."
-        return "❌ I couldn't save after 4 tries (file busy or changing). Nothing was changed; try again later."
+        if status == 423:
+            return ("❌ The workbook is still locked (open in Excel). **Close it in Excel on every PC**, then type "
+                    "**Inventory Refresh** again. Nothing was changed.")
+        return "❌ I couldn't save after 4 tries (the file kept changing). Nothing was changed; try again later."
 
     async def run_tool(self, name: str, args: dict) -> dict:
         module = tools.TOOLS.get(name)
