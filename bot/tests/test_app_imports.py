@@ -40,8 +40,9 @@ def test_sdk_reads_managed_identity_settings_from_env():
 
     env = {
         "CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE": "UserManagedIdentity",
-        "CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENT_ID": "11111111-2222-3333-4444-555555555555",
-        "CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANT_ID": "66666666-7777-8888-9999-000000000000",
+        # Spelling matters: CLIENT_ID / TENANT_ID are silently ignored by SDK 1.9 (found by this test).
+        "CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID": "11111111-2222-3333-4444-555555555555",
+        "CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID": "66666666-7777-8888-9999-000000000000",
     }
     manager = MsalConnectionManager(**load_configuration_from_env(env))
     cfg = manager.get_default_connection_configuration()

@@ -6,8 +6,9 @@ Started on App Service (startup command set by m365-terraform):
 
 Sign-in to the Bot Service uses the user-assigned managed identity. App settings:
   CONNECTIONS__SERVICE_CONNECTION__SETTINGS__AUTHTYPE = UserManagedIdentity
-  CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENT_ID = <managed identity client ID>
-  CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANT_ID = <tenant ID>
+  CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID = <managed identity client ID>
+  CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID = <tenant ID>
+  (exact spelling: CLIENT_ID / TENANT_ID are ignored; see tests/test_app_imports.py)
 Incoming requests are verified by the SDK's jwt_authorization_middleware (only
 the Bot Service, with a valid token for this bot, can post messages).
 """
