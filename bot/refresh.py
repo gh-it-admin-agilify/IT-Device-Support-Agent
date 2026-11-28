@@ -3,7 +3,8 @@
 Approved 2026-11-28:
   1. tblIntuneDevices        rebuilt from Intune (Notes and other hand-written columns kept by serial)
   2. tblAutopilotNotInIntune rebuilt (Autopilot records with no Intune record; hand-written columns kept)
-  3. tblDecommissioning      rows REMOVED when the laptop is in use
+  3. tblDecommissioning      rows REMOVED only when the laptop is in use by SOMEONE OTHER than its
+                             "Last user" (re-deployed); still with its last user = kept (fix 2026-11-28)
   4. tblStock                rows REMOVED when the laptop is in use
   5. tblChangeLog            one row per removal + a summary row per rebuilt table
 "In use" = in Intune, has a primary user, last check-in within IN_USE_DAYS days.
@@ -91,6 +92,7 @@ class Plan:
     intune_rows: list[dict] = field(default_factory=list)
     autopilot_rows: list[dict] = field(default_factory=list)
     remove: dict[str, list[dict]] = field(default_factory=dict)  # table -> [{serial, why}]
+    kept: dict[str, list[dict]] = field(default_factory=dict)    # in use but deliberately kept (shown in preview)
     old_counts: dict[str, int] = field(default_factory=dict)
     new_serials: dict[str, list[str]] = field(default_factory=dict)
     gone_serials: dict[str, list[str]] = field(default_factory=dict)
@@ -188,7 +190,8 @@ def plan_refresh(data: bytes, src: dict, now: datetime | None = None) -> Plan:
     plan.new_serials[T_AP] = sorted(new_ap - set(old_ap_by))
     plan.gone_serials[T_AP] = sorted(set(old_ap_by) - new_ap)
 
-    # 3 + 4. In-use laptops leave Decommissioning and Stock
+    # 3 + 4. In-use laptops leave Stock. In Decommissioning a laptop is normally still with its
+    # last user until it's shipped back, so it leaves only when SOMEONE ELSE uses it (re-deployed).
     def in_use(s):
         m = md_by.get(s)
         if not m or not m.get("userPrincipalName"):
@@ -196,14 +199,52 @@ def plan_refresh(data: bytes, src: dict, now: datetime | None = None) -> Plan:
         last = _dt(m.get("lastSyncDateTime"))
         if not last or (now - last).days > IN_USE_DAYS:
             return None
-        return f"in use by {m.get('userDisplayName') or m['userPrincipalName']}, last check-in {last:%Y-%m-%d}"
+        return m, f"in use by {m.get('userDisplayName') or m['userPrincipalName']}, last check-in {last:%Y-%m-%d}"
 
-    for tname in (T_DECOM, T_STOCK):
-        _, rows = read_table(wb, tname)
-        plan.old_counts[tname] = len(rows)
-        plan.remove[tname] = [{"serial": _key(r.get("Serial")), "why": why}
-                              for r in rows if (why := in_use(_key(r.get("Serial"))))]
+    _, stock = read_table(wb, T_STOCK)
+    plan.old_counts[T_STOCK] = len(stock)
+    plan.remove[T_STOCK] = [{"serial": _key(r.get("Serial")), "why": u[1]}
+                            for r in stock if (u := in_use(_key(r.get("Serial"))))]
+
+    _, decom = read_table(wb, T_DECOM)
+    plan.old_counts[T_DECOM] = len(decom)
+    plan.remove[T_DECOM], plan.kept[T_DECOM] = [], []
+    for r in decom:
+        s = _key(r.get("Serial"))
+        u = in_use(s)
+        if not u:
+            continue
+        m, why = u
+        if same_person(r.get("Last user"), m.get("userPrincipalName"), m.get("userDisplayName")):
+            plan.kept[T_DECOM].append({"serial": s, "why": f"still with {m.get('userDisplayName') or m['userPrincipalName']}"
+                                                         " (its last user, not yet returned)"})
+        elif not str(r.get("Last user") or "").strip():
+            plan.kept[T_DECOM].append({"serial": s, "why": f"{why}; 'Last user' is empty, so I can't tell "
+                                                         "whether it was re-deployed: please check"})
+        else:
+            plan.remove[T_DECOM].append({"serial": s, "why": f"re-deployed: {why} (last user was {r.get('Last user')})"})
     return plan
+
+
+def _norm(text) -> str:
+    return " ".join(str(text or "").lower().replace(".", " ").replace("_", " ").replace("-", " ").split())
+
+
+def same_person(last_user, upn, display) -> bool:
+    """Does the workbook's 'Last user' (name, email or alias, typed by hand) mean this Intune user?"""
+    lu = _norm(str(last_user or "").split("@")[0] if "@" in str(last_user or "") else last_user)
+    if not lu:
+        return False
+    names = {_norm(display), _norm(str(upn or "").split("@")[0])} - {""}
+    if lu in names:
+        return True
+    for n in names:  # e.g. "Adrienne" or "Adrienne Streater (Sales)" vs "Adrienne Streater"
+        tokens = n.split()
+        if tokens and all(t in lu.split() for t in tokens):
+            return True
+        if lu and set(lu.split()) <= set(tokens):
+            return True
+    return False
 
 
 def preview(plan: Plan) -> str:
@@ -221,6 +262,9 @@ def preview(plan: Plan) -> str:
         rem = plan.remove.get(t, [])
         lines.append(f"• **{label}**: " + ("none" if not rem else
                      "; ".join(f"{r['serial']} ({r['why']})" for r in rem)))
+        kept = plan.kept.get(t, [])
+        if kept:
+            lines.append(f"• **Kept in Decommissioning**: " + "; ".join(f"{r['serial']} ({r['why']})" for r in kept))
     lines.append("Notes and other hand-written columns are kept. Every change goes into the Change Log, "
                  "and SharePoint keeps the previous version.")
     return "\n\n".join(lines)
