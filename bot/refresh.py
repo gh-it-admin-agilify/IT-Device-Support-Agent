@@ -328,9 +328,10 @@ def write_table(wb, name: str, rows: list[dict]) -> None:
             else:
                 cell.value = keep.get(h)
             cell._style = copy(styles[c])
-    for r in range(new_last + 1, r2 + 1):  # shrinking: clear what's left
+    from .inventory import clear_cell
+    for r in range(new_last + 1, r2 + 1):  # shrinking: clear what's left (value AND formatting)
         for c in range(c1, c2 + 1):
-            ws.cell(r, c).value = None
+            clear_cell(ws.cell(r, c))
     ref = f"{get_column_letter(c1)}{r1}:{get_column_letter(c2)}{new_last}"
     t.ref = ref
     if t.autoFilter is not None:
@@ -370,9 +371,10 @@ def remove_rows(wb, name: str, serials: set[str]) -> list[str]:
             cell.value = value
             cell._style = style
     new_last = r1 + max(len(keep_rows), 1)
-    for r in range(r1 + 1 + len(keep_rows), r2 + 1):
+    from .inventory import clear_cell
+    for r in range(r1 + 1 + len(keep_rows), r2 + 1):  # rows left over: value AND formatting cleared
         for c in range(c1, c2 + 1):
-            ws.cell(r, c).value = None
+            clear_cell(ws.cell(r, c))
     ref = f"{get_column_letter(c1)}{r1}:{get_column_letter(c2)}{new_last}"
     t.ref = ref
     if t.autoFilter is not None:
