@@ -96,7 +96,11 @@ class InventoryStore:
 
 # ---------- column widths: call autosize_columns(wb) as the LAST step before EVERY save
 
-MIN_WIDTH, MAX_WIDTH = 8, 60
+MIN_WIDTH = 8
+WRAP_WIDTH = 50     # columns with longer text get this width + Wrap Text (shown on several lines)
+HEADER_EXTRA = 4    # bold header + the filter arrow need more room than plain values
+VALUE_EXTRA = 2
+MAX_WIDTH = WRAP_WIDTH
 
 
 def _text_len(value) -> int:
@@ -115,21 +119,46 @@ def _text_len(value) -> int:
 
 
 def autosize_columns(wb) -> None:
-    """Approximate Excel's AutoFit (openpyxl can't measure fonts): for every column of every
-    table, width = longest header/value + 2, between MIN_WIDTH and MAX_WIDTH characters.
+    """Approximate Excel's AutoFit (openpyxl can't measure fonts), for every column of every table:
+      width = max(header + HEADER_EXTRA, longest value + VALUE_EXTRA), at least MIN_WIDTH;
+      if that is more than WRAP_WIDTH: width = WRAP_WIDTH and Wrap Text on the data cells, so long
+      text shows on several lines (Excel sets the row height when it opens the file).
     Only cells inside tables count, so a long title above a table doesn't widen column A."""
+    from copy import copy
+
     from openpyxl.utils import get_column_letter
     from openpyxl.utils.cell import range_boundaries
 
     for ws in wb.worksheets:
         widths: dict[int, int] = {}
+        data_rows: dict[int, list[int]] = {}
         for t in ws.tables.values():
             c1, r1, c2, r2 = range_boundaries(t.ref)
             for c in range(c1, c2 + 1):
-                longest = max((_text_len(ws.cell(r, c).value) for r in range(r1, r2 + 1)), default=0)
-                widths[c] = max(widths.get(c, 0), longest)
+                header = _text_len(ws.cell(r1, c).value) + HEADER_EXTRA
+                longest = max((_text_len(ws.cell(r, c).value) for r in range(r1 + 1, r2 + 1)), default=0)
+                widths[c] = max(widths.get(c, 0), header, longest + VALUE_EXTRA)
+                data_rows.setdefault(c, []).extend(range(r1 + 1, r2 + 1))
         for c, n in widths.items():
-            ws.column_dimensions[get_column_letter(c)].width = min(max(n + 2, MIN_WIDTH), MAX_WIDTH)
+            width = max(n, MIN_WIDTH)
+            if width > WRAP_WIDTH:
+                width = WRAP_WIDTH
+                for r in data_rows[c]:
+                    cell = ws.cell(r, c)
+                    if not cell.alignment.wrap_text:
+                        al = copy(cell.alignment)
+                        al.wrap_text = True
+                        al.vertical = al.vertical or "top"
+                        cell.alignment = al
+            ws.column_dimensions[get_column_letter(c)].width = width
+
+
+def clear_cell(cell) -> None:
+    """Empty a cell completely: value AND formatting (fill, borders, fonts) back to default."""
+    from openpyxl.styles.cell_style import StyleArray
+
+    cell.value = None
+    cell._style = StyleArray()
 
 
 # ---------- workbook inspection (runs in a worker thread: openpyxl is CPU work)

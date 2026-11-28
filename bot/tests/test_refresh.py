@@ -266,6 +266,25 @@ def test_columns_autosized_after_save():
     assert all(MIN_WIDTH <= log.column_dimensions[c].width <= MAX_WIDTH for c in "ABCDEFG")
 
 
+def test_long_text_wraps_headers_fit_and_emptied_rows_lose_formatting():
+    from bot.inventory import HEADER_EXTRA, WRAP_WIDTH
+
+    wb = load_workbook(io.BytesIO(make_workbook()))
+    ws = wb["Stock"]
+    long_text = "Not assigned - needs reset via forced recovery (see issue #20); then Available for a new user"
+    ws["L3"] = long_text                       # ST2's Status: far longer than WRAP_WIDTH
+    ws["K3"] = "Yes"                           # header "Confirmed" is longer than the values
+    out = io.BytesIO()
+    wb.save(out)
+    data = out.getvalue()
+    new, _ = refresh.apply_plan(data, refresh.plan_refresh(data, SRC, NOW), "Felix", NOW)
+    st = load_workbook(io.BytesIO(new))["Stock"]
+    assert st.column_dimensions["L"].width == WRAP_WIDTH and st["L2"].value == long_text
+    assert st["L2"].alignment.wrap_text is True and st["L1"].alignment.wrap_text is not True  # header untouched
+    assert st.column_dimensions["K"].width == len("Confirmed") + HEADER_EXTRA
+    assert st["A3"].value is None and st["A3"].fill.fill_type is None   # S1's old row: no leftover colour
+
+
 async def test_keep_typing_sends_indicator_and_one_still_working():
     sent = []
 
