@@ -25,6 +25,13 @@ exports/
 .claude/settings.local.json
 CLAUDE.local.md
 
+# Python (bot/)
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+dist/
+
 # Editor / OS clutter
 .vscode/
 *.swp
