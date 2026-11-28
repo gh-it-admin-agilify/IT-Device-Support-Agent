@@ -20,6 +20,7 @@ the m365-terraform repo (`environments/prod/itdesk-bot.tf`).
 | `agent.py` | Identity check → Claude → reply; `reset` command |
 | `identity.py` | Group-based mode |
 | `memory.py` | Conversation memory in RAM: last 60 messages per chat, forgotten after 4 h idle (app settings `MEMORY_MAX_MESSAGES`, `MEMORY_TTL_HOURS`); text only, no tool data or images |
+| `inventory.py` | Inventory workbook on the Device Support site: find, download, round-trip, upload with version check (eTag). Uploads only into `Device Inventory`, `.xlsx` only; during 5e-0 only `TEST - *` files. Approver command `selftest inventory` proves it on the TEST copy |
 | `claude.py` | Foundry client + bounded tool loop |
 | `graph.py` | Graph client with allow-list |
 | `tools/` | One file per tool: `laptop_status`, `person_devices`, `enrollment_readiness`, `not_enrolled`, `runbook` (shared helpers in `_common.py`) |

@@ -29,8 +29,10 @@ FetchFiles = Callable[[], Awaitable[list[bytes]]]
 
 class ItBot:
     def __init__(self, graph: GraphClient, identity: IdentityResolver, claude_client: Any, deployment: str,
-                 max_steps: int = 8, max_tokens: int = 1500, memory: ConversationStore | None = None):
+                 max_steps: int = 8, max_tokens: int = 1500, memory: ConversationStore | None = None,
+                 inventory: Any = None):
         self.graph = graph
+        self.inventory = inventory
         self.identity = identity
         self.claude = claude_client
         self.deployment = deployment
@@ -63,6 +65,15 @@ class ItBot:
         if text.lower() in RESET_WORDS and not has_attachments:
             self.memory.reset(conv)
             return RESET_REPLY
+        if text.lower() == "selftest inventory":
+            if mode is not Mode.APPROVER or self.inventory is None:
+                return "The inventory self-test is for approvers only."
+            from .inventory import selftest
+            try:
+                return await selftest(self.inventory)
+            except Exception as exc:
+                log.exception("inventory selftest failed")
+                return f"❌ Inventory self-test stopped: {type(exc).__name__}: {str(exc)[:300]}"
 
         pictures: list[img.Image] = []
         notes: list[str] = []
