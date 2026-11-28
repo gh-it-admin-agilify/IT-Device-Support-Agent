@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.30/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.30",
+  "version": "1.0.0",
+  "id": "5d7e2b1c-8a43-4f6e-9c21-3b8e7a90d4f6",
+  "developer": {
+    "name": "Agilify IT",
+    "websiteUrl": "https://www.agilifyus.com",
+    "privacyUrl": "https://www.agilifyus.com",
+    "termsOfUseUrl": "https://www.agilifyus.com"
+  },
+  "name": {
+    "short": "Agilify IT Bot",
+    "full": "Agilify IT Bot - laptop and device support"
+  },
+  "description": {
+    "short": "Laptop status, device runbooks and inventory help for Agilify IT.",
+    "full": "Internal assistant for Agilify's IT support team. Looks up laptop status in Intune, Windows Autopilot and Entra (read-only), walks the IT Support Tech through device runbooks one step at a time, and sends any tenant change to the Approver as a change request. Only members of the IT support groups can use it. BitLocker recovery keys are never shown in chat."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#1F4E79",
+  "bots": [
+    {
+      "botId": "c36dcf57-8f8a-4093-9301-169303f8ec1b",
+      "scopes": ["personal"],
+      "supportsFiles": false,
+      "isNotificationOnly": false,
+      "commandLists": [
+        {
+          "scopes": ["personal"],
+          "commands": [
+            { "title": "Laptop status", "description": "e.g. What's the status of SERIAL-1?" },
+            { "title": "Help", "description": "What can the bot do?" }
+          ]
+        }
+      ]
+    }
+  ],
+  "validDomains": ["app-agilify-itbot.azurewebsites.net"]
+}
