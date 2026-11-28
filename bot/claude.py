@@ -28,7 +28,7 @@ async def ask(
     client: Any,
     deployment: str,
     mode: str,
-    user_text: str,
+    user_text: str | list[dict],
     tool_specs: list[dict],
     run_tool: ToolRunner,
     max_steps: int = 6,

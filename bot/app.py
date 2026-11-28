@@ -28,6 +28,7 @@ async def create_app() -> Application:
     from microsoft_agents.authentication.msal import MsalConnectionManager
     from microsoft_agents.hosting.aiohttp import CloudAdapter, jwt_authorization_middleware, start_agent_process
     from microsoft_agents.hosting.core import AgentApplication, MemoryStorage, TurnContext, TurnState
+    from microsoft_agents.hosting.core.app.m365_attachment_downloader import M365AttachmentDownloader
 
     from .agent import ItBot
     from .claude import make_client
@@ -46,6 +47,7 @@ async def create_app() -> Application:
         storage=MemoryStorage(), adapter=adapter, connection_manager=connection_manager, **sdk_config
     )
 
+    downloader = M365AttachmentDownloader(connections=connection_manager)
     graph = GraphClient(ManagedIdentityCredential(client_id=settings.managed_identity_client_id))
     bot = ItBot(
         graph=graph,
@@ -64,8 +66,18 @@ async def create_app() -> Application:
         aad_id = getattr(sender, "aad_object_id", None)
         conversation = getattr(context.activity, "conversation", None)
         conv_id = getattr(conversation, "id", None)
+        # Teams adds a text/html copy of most messages; only other attachments are real files/images.
+        real = [a for a in (context.activity.attachments or [])
+                if not str(getattr(a, "content_type", "") or "").startswith("text/html")]
+
+        async def fetch_files() -> list[bytes]:
+            # Downloads with the bot's own identity (managed identity); called only after the identity check.
+            files = await downloader.download_files(context)
+            return [f.content for f in files if f and f.content]
+
         try:
-            reply = await bot.handle(aad_id, context.activity.text or "", conv_id)
+            reply = await bot.handle(aad_id, context.activity.text or "", conv_id,
+                                     has_attachments=bool(real), fetch_files=fetch_files)
         except Exception:
             log.exception("message handling failed")
             reply = "Sorry, something went wrong on my side. Please try again in a minute."
